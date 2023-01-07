@@ -1,0 +1,36 @@
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    tasks:
+    - task: Maven@3
+      inputs:
+        mavenPomFile: 'pom.xml'
+        goals: 'package'
+- stage: Test
+  jobs:
+  - job: Test
+    tasks:
+    - task: JUnit@1
+      inputs:
+        testResultsFiles: '*/TEST-.xml'
+- stage: Deploy
+  jobs:
+  - job: Deploy
+    tasks:
+    - task: Docker@2
+      inputs:
+        command: 'buildAndPush'
+        repository: 'myrepository'
+        dockerfile: 'Dockerfile'
+        buildContext: '.'
+- stage: Monitor
+  jobs:
+  - job: Monitor
+    tasks:
+    - task: SonarQube@4
+      inputs:
+        scannerMode: 'MSBuild'
+        projectKey: 'myproject'
+        projectName: 'My Project'
+        projectVersion: '1.0'
